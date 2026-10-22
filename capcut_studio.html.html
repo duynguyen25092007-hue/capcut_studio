@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CapCut Web Studio Pro - Trình Chỉnh Sửa & Render Video</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; user-select: none; }
+    body { background-color: #0e0f14; color: #e2e8f0; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #14161f; }
+    ::-webkit-scrollbar-thumb { background: #2d3142; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00e5ff; }
+    input[type="range"] { accent-color: #00e5ff; }
+    .capcut-gradient { background: linear-gradient(135deg, #00e5ff 0%, #7c3aed 100%); }
+    .timeline-grid {
+      background-size: 50px 100%;
+      background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px);
+    }
+    .clip-selected { outline: 2px solid #00e5ff; box-shadow: 0 0 12px rgba(0, 229, 255, 0.35); }
+  </style>
+</head>
+<body class="h-screen flex flex-col bg-[#0e0f14] text-slate-100 overflow-hidden">
+
+  <!-- TOP HEADER BAR -->
+  <header class="h-13 bg-[#151722] border-b border-slate-800 px-3 py-2 flex items-center justify-between shrink-0 z-20">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg capcut-gradient flex items-center justify-center font-black text-slate-950 text-sm shadow-md">
+        CC
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <input id="projectTitleInput" type="text" value="Dự án Video Viral #01" class="bg-transparent text-sm font-bold text-white focus:outline-none focus:bg-slate-800 px-1.5 py-0.5 rounded border border-transparent focus:border-cyan-400" />
+          <span class="text-[11px] bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 px-2 py-0.5 rounded-full font-medium">PRO STUDIO</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aspect Ratio & Quick Tools -->
+    <div class="hidden md:flex items-center gap-2 bg-[#0e0f14] px-2.5 py-1 rounded-lg border border-slate-800">
+      <span class="text-xs text-slate-400">Tỷ lệ khung:</span>
+      <button id="ratio169Btn" class="px-2 py-1 text-xs rounded bg-cyan-500 text-slate-950 font-semibold transition">16:9 YouTube</button>
+      <button id="ratio916Btn" class="px-2 py-1 text-xs rounded text-slate-300 hover:bg-slate-800 transition">9:16 TikTok</button>
+      <button id="ratio11Btn" class="px-2 py-1 text-xs rounded text-slate-300 hover:bg-slate-800 transition">1:1 Vuông</button>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="flex items-center gap-2">
+      <label for="uploadVideoInput" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+        <span>📁 Tải Video Lên</span>
+      </label>
+      <input id="uploadVideoInput" type="file" accept="video/*" multiple class="hidden" />
+
+      <button id="resetDemoBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 transition" title="Khôi phục mẫu">
+        ↺ Mẫu Demo
+      </button>
+
+      <button id="openRenderModalBtn" class="capcut-gradient hover:opacity-95 text-slate-950 font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 transition">
+        <span>⚡ Xuất / Render Video</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE (UPPER AREA) -->
+  <div class="flex-1 flex min-h-0 overflow-hidden">
+
+    <!-- LEFT ICON RAIL (CAPCUT TOOL TABS) -->
+    <nav class="w-16 sm:w-20 bg-[#12141d] border-r border-slate-800 flex flex-col items-center py-2 gap-1 shrink-0 overflow-y-auto">
+      <button data-tab="media" class="tool-tab-btn w-14 sm:w-16 py-2 rounded-lg flex flex-col items-center gap-1 text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 text-[11px] font-medium">
+        <span class="text-base">🎬</span>
+        <span>Media</span>
+      </button>
+      <button data-tab="vietsub" class="tool-tab-btn w-14 sm:w-16 py-2 rounded-lg flex flex-col items-center gap-1 text-slate-400 hover:text-white hover:bg-slate-800/60 text-[11px] font-medium">
+        <span class="text-base">💬</span>
+        <span>Vietsub</span>
+      </button>
+      <button data-tab="delogo" class="tool-tab-btn w-14 sm:w-16 py-2 rounded-lg flex flex-col items-center gap-1 text-slate-400 hover:text-white hover:bg-slate-800/60 text-[11px] font-medium">
+        <span class="text-base">🪄</span>
+        <span>Xoá Logo</span>
+      </button>
+      <button data-tab="stickers" class="tool-tab-btn w-14 sm:w-16 py-2 rounded-lg flex flex-col items-center gap-1 text-slate-400 hover:text-white hover:bg-slate-800/60 text-[11px] font-medium">
+        <span class="text-base">✨</span>
+        <span>Nhãn Dán</span>
+      </button>
+      <button data-tab="effects" class="tool-tab-btn w-14 sm:w-16 py-2 rounded-lg flex flex-col items-center gap-1 text-slate-400 hover:text-white hover:bg-slate-800/60 text-[11px] font-medium">
+        <span class="text-base">🔥</span>
+        <span>Hiệu Ứng</span>
+      </button>
+      <button data-tab="voice" class="tool-tab-btn w-14 sm:w-16 py-2 rounded-lg flex flex-col items-center gap-1 text-slate-400 hover:text-white hover:bg-slate-800/60 text-[11px] font-medium">
+        <span class="text-base">🎙️</span>
+        <span>Lồng Giọng</span>
+      </button>
+    </nav>
+
+    <!-- LEFT TOOL DRAWER PANEL -->
+    <aside class="w-72 lg:w-80 bg-[#161924] border-r border-slate-800 flex flex-col shrink-0 overflow-hidden">
+
+      <!-- TAB 1: MEDIA & CLIPS (TÁCH / GHÉP VIDEO) -->
+      <div id="panel-media" class="tool-panel flex-1 flex flex-col p-3 overflow-y-auto space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400">Kho Video & Ghép Clip</h2>
+          <span id="clipCountBadge" class="text-[11px] bg-slate-800 px-2 py-0.5 rounded text-slate-300">2 clips</span>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 space-y-2">
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Tải video MP4/WebM từ máy hoặc thêm cảnh mẫu để <strong>Tách (Split)</strong>, <strong>Ghép nối</strong> và chèn chuyển cảnh.
+          </p>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button id="addCyberSceneBtn" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 px-2 rounded border border-slate-700 text-left flex items-center gap-1.5">
+              <span>🌆</span> <span>+ Cảnh Neon</span>
+            </button>
+            <button id="addNatureSceneBtn" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 px-2 rounded border border-slate-700 text-left flex items-center gap-1.5">
+              <span>🌊</span> <span>+ Cảnh Biển</span>
+            </button>
+            <button id="addStudioSceneBtn" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 px-2 rounded border border-slate-700 text-left flex items-center gap-1.5">
+              <span>🎙️</span> <span>+ Cảnh Vlog</span>
+            </button>
+            <button id="addIntroSceneBtn" class="bg-slate-800 hover:bg-slate-700 text-xs py-2 px-2 rounded border border-slate-700 text-left flex items-center gap-1.5">
+              <span>🚀</span> <span>+ Cảnh Intro</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-300">Danh sách Clip trên Timeline</span>
+            <button id="splitAtPlayheadLeftBtn" class="text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded hover:bg-amber-500/30">
+              ✂️ Tách tại Playhead
+            </button>
+          </div>
+          <div id="mediaClipList" class="space-y-1.5"></div>
+        </div>
+
+        <!-- Transition selector -->
+        <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 space-y-2">
+          <label class="text-xs font-semibold text-slate-300 block">Chuyển cảnh giữa các Clip (Transition)</label>
+          <select id="transitionSelect" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+            <option value="none">Không chuyển cảnh (Cut thẳng)</option>
+            <option value="fade" selected>Mờ dần (Cross Fade)</option>
+            <option value="flash">Chớp sáng (White Flash)</option>
+            <option value="slide">Trượt ngang (Slide Wipe)</option>
+            <option value="zoom">Thu phóng (Zoom Punch)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TAB 2: VIETSUB (PHỤ ĐỀ TIẾNG VIỆT) -->
+      <div id="panel-vietsub" class="tool-panel hidden flex-1 flex flex-col p-3 overflow-y-auto space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400">Vietsub & Phụ Đề Tự Động</h2>
+          <button id="autoVietsubBtn" class="text-[11px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded hover:bg-cyan-500/30">
+            ✨ AI Tạo Vietsub Mẫu
+          </button>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
+          <label class="text-xs font-semibold text-slate-300 block">Nội dung câu Vietsub</label>
+          <input id="subTextInput" type="text" placeholder="Nhập phụ đề tiếng Việt..." value="Chào mừng bạn đến với CapCut Web Studio!" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white" />
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-400">Bắt đầu (giây)</label>
+              <input id="subStartInput" type="number" step="0.5" min="0" value="0" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400">Kết thúc (giây)</label>
+              <input id="subEndInput" type="number" step="0.5" min="0.5" value="3.5" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white" />
+            </div>
+          </div>
+          <div class="flex gap-1.5 pt-1">
+            <button id="setSubFromPlayheadBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-1.5 rounded border border-slate-700">
+              ⏱ Lấy mốc hiện tại
+            </button>
+            <button id="addSubtitleBtn" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs py-1.5 rounded">
+              + Thêm Vietsub
+            </button>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
+          <span class="text-xs font-semibold text-slate-300 block">Kiểu chữ Vietsub (Style)</span>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-400">Màu chữ</label>
+              <input id="subColorInput" type="color" value="#ffea00" class="w-full h-7 bg-slate-800 border border-slate-700 rounded cursor-pointer" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400">Nền hộp chữ</label>
+              <select id="subBgStyleSelect" class="w-full bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-xs text-white">
+                <option value="box">Hộp đen mờ (Chuẩn Vietsub)</option>
+                <option value="outline">Viền đen đậm (TikTok)</option>
+                <option value="neon">Phát sáng Neon</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-400">Cỡ chữ: <span id="subSizeVal">26</span>px</label>
+              <input id="subSizeInput" type="range" min="16" max="44" value="26" class="w-full" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400">Vị trí dọc: <span id="subYVal">85</span>%</label>
+              <input id="subYInput" type="range" min="15" max="92" value="85" class="w-full" />
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <label for="importSrtInput" class="cursor-pointer text-[11px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded border border-slate-700 text-slate-300">
+              📥 Nhập file .SRT
+            </label>
+            <input id="importSrtInput" type="file" accept=".srt,.txt" class="hidden" />
+            <button id="exportSrtBtn" class="text-[11px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded border border-slate-700 text-cyan-300">
+              📤 Xuất file .SRT
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <span class="text-xs font-semibold text-slate-300">Danh sách câu thoại Vietsub</span>
+          <div id="subtitleListContainer" class="space-y-1.5"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: XOÁ LOGO / WATERMARK REMOVER -->
+      <div id="panel-delogo" class="tool-panel hidden flex-1 flex flex-col p-3 overflow-y-auto space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400">Xoá Logo / Watermark AI</h2>
+          <label class="inline-flex items-center gap-1.5 cursor-pointer">
+            <input id="delogoEnableToggle" type="checkbox" checked class="rounded accent-cyan-400" />
+            <span class="text-xs text-cyan-300 font-semibold">Bật Xoá Logo</span>
+          </label>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-2.5">
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Kéo trực tiếp khung viền đỏ trên màn hình Preview hoặc chỉnh toạ độ bên dưới để che/xoá logo góc video.
+          </p>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1">Chế độ thuật toán xoá</label>
+            <select id="delogoModeSelect" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white">
+              <option value="inpaint" selected>Nội suy vùng biên mượt (Smart Inpaint)</option>
+              <option value="blur">Làm mờ Gaussian (Smooth Blur)</option>
+              <option value="pixelate">Làm nhòe Ô vuông (Pixelate Mosaic)</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-400">Toạ độ ngang X: <span id="delogoXVal">74</span>%</label>
+              <input id="delogoXInput" type="range" min="0" max="90" value="74" class="w-full" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400">Toạ độ dọc Y: <span id="delogoYVal">8</span>%</label>
+              <input id="delogoYInput" type="range" min="0" max="90" value="8" class="w-full" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400">Chiều rộng W: <span id="delogoWVal">22</span>%</label>
+              <input id="delogoWInput" type="range" min="5" max="50" value="22" class="w-full" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400">Chiều cao H: <span id="delogoHVal">12</span>%</label>
+              <input id="delogoHInput" type="range" min="5" max="40" value="12" class="w-full" />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[11px] text-slate-400">Độ mạnh xử lý: <span id="delogoStrengthVal">18</span>px</label>
+            <input id="delogoStrengthInput" type="range" min="6" max="40" value="18" class="w-full" />
+          </div>
+
+          <div class="flex items-center justify-between pt-1">
+            <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+              <input id="showDelogoBoxToggle" type="checkbox" checked class="accent-cyan-400" />
+              <span>Hiện khung căn chỉnh trên màn hình</span>
+            </label>
+          </div>
+
+          <div class="pt-1">
+            <span class="text-[11px] text-slate-400 block mb-1">Vị trí Logo phổ biến:</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button id="presetTopRightBtn" class="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded border border-slate-700">Góc Trên Phải</button>
+              <button id="presetTopLeftBtn" class="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded border border-slate-700">Góc Trên Trái</button>
+              <button id="presetBottomRightBtn" class="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded border border-slate-700">Góc Dưới Phải</button>
+              <button id="presetBottomLeftBtn" class="bg-slate-800 hover:bg-slate-700 text-xs py-1 rounded border border-slate-700">Góc Dưới Trái</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: NHÃN DÁN (STICKERS & EMOJI OVERLAYS) -->
+      <div id="panel-stickers" class="tool-panel hidden flex-1 flex flex-col p-3 overflow-y-auto space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400">Kho Nhãn Dán & Sticker Động</h2>
+          <span class="text-[11px] text-slate-400">Click để chèn</span>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2 bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+          <button data-sticker="🔥" class="sticker-add-btn text-2xl p-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition transform hover:scale-110">🔥</button>
+          <button data-sticker="😂" class="sticker-add-btn text-2xl p-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition transform hover:scale-110">😂</button>
+          <button data-sticker="❤️" class="sticker-add-btn text-2xl p-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition transform hover:scale-110">❤️</button>
+          <button data-sticker="👍" class="sticker-add-btn text-2xl p-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition transform hover:scale-110">👍</button>
+          <button data-sticker="🎉" class="sticker-add-btn text-2xl p-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition transform hover:scale-110">🎉</button>
+          <button data-sticker="💎" class="sticker-add-btn text-2xl p-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition transform hover:scale-110">💎</button>
+          <button data-sticker="⚡" class="sticker-add-btn text-2xl p-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition transform hover:scale-110">⚡</button>
+          <button data-sticker="🚀" class="sticker-add-btn text-2xl p-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center transition transform hover:scale-110">🚀</button>
+          <button data-sticker="SUBSCRIBE 🔔" class="sticker-add-btn col-span-2 text-xs font-extrabold py-2 px-2 bg-red-600 hover:bg-red-500 text-white rounded-lg flex items-center justify-center">SUBSCRIBE 🔔</button>
+          <button data-sticker="FOLLOW ME ✨" class="sticker-add-btn col-span-2 text-xs font-extrabold py-2 px-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg flex items-center justify-center">FOLLOW ME ✨</button>
+          <button data-sticker="LIKE & SHARE 💖" class="sticker-add-btn col-span-2 text-xs font-extrabold py-2 px-2 bg-pink-600 hover:bg-pink-500 text-white rounded-lg flex items-center justify-center">LIKE & SHARE 💖</button>
+          <button data-sticker="VIETSUB VIP 🇻🇳" class="sticker-add-btn col-span-2 text-xs font-extrabold py-2 px-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg flex items-center justify-center">VIETSUB VIP 🇻🇳</button>
+        </div>
+
+        <div class="space-y-1.5">
+          <span class="text-xs font-semibold text-slate-300">Nhãn dán đang dùng (Kéo trên màn hình để di chuyển)</span>
+          <div id="activeStickersList" class="space-y-1.5"></div>
+        </div>
+      </div>
+
+      <!-- TAB 5: HIỆU ỨNG VIDEO & BỘ LỌC MÀU (VFX & FILTERS) -->
+      <div id="panel-effects" class="tool-panel hidden flex-1 flex flex-col p-3 overflow-y-auto space-y-3">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400">Hiệu Ứng VFX & Chỉnh Màu</h2>
+
+        <div class="space-y-1.5">
+          <span class="text-xs font-semibold text-slate-300">Hiệu ứng đặc biệt (VFX Preset)</span>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button data-vfx="none" class="vfx-btn bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs py-2 rounded font-semibold">✨ Mặc định</button>
+            <button data-vfx="glitch" class="vfx-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs py-2 rounded">⚡ Glitch RGB</button>
+            <button data-vfx="vhs" class="vfx-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs py-2 rounded">📼 Retro VHS</button>
+            <button data-vfx="shake" class="vfx-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs py-2 rounded">💥 Bass Shake</button>
+            <button data-vfx="cinema" class="vfx-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs py-2 rounded">🎬 Cinema Bar</button>
+            <button data-vfx="neon" class="vfx-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs py-2 rounded">🔮 Cyberpunk</button>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-300">Chỉnh màu chuyên sâu (Color Grading)</span>
+            <button id="resetColorBtn" class="text-[11px] text-cyan-400 hover:underline">Đặt lại</button>
+          </div>
+          <div>
+            <label class="text-[11px] text-slate-400">Độ sáng (Brightness): <span id="fxBrightVal">100</span>%</label>
+            <input id="fxBrightInput" type="range" min="50" max="150" value="100" class="w-full" />
+          </div>
+          <div>
+            <label class="text-[11px] text-slate-400">Tương phản (Contrast): <span id="fxContrastVal">100</span>%</label>
+            <input id="fxContrastInput" type="range" min="50" max="160" value="100" class="w-full" />
+          </div>
+          <div>
+            <label class="text-[11px] text-slate-400">Bão hoà màu (Saturation): <span id="fxSatVal">100</span>%</label>
+            <input id="fxSatInput" type="range" min="0" max="200" value="100" class="w-full" />
+          </div>
+          <div>
+            <label class="text-[11px] text-slate-400">Đổi tông màu (Hue Rotate): <span id="fxHueVal">0</span>°</label>
+            <input id="fxHueInput" type="range" min="0" max="360" value="0" class="w-full" />
+          </div>
+          <div>
+            <label class="text-[11px] text-slate-400">Tốc độ phát (Speed): <span id="fxSpeedVal">1.0</span>x</label>
+            <input id="fxSpeedInput" type="range" min="0.5" max="2.0" step="0.25" value="1.0" class="w-full" />
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: LỒNG GIỌNG (VOICEOVER / TTS / AUDIO MIXER) -->
+      <div id="panel-voice" class="tool-panel hidden flex-1 flex flex-col p-3 overflow-y-auto space-y-3">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400">Lồng Giọng & Âm Thanh</h2>
+
+        <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
+          <span class="text-xs font-semibold text-slate-300 block">1. Thu âm giọng đọc trực tiếp (Micro)</span>
+          <p class="text-[11px] text-slate-400">Thu giọng thật từ micro vào đúng vị trí con trỏ timeline hiện tại.</p>
+          <button id="recordMicBtn" class="w-full py-2 px-3 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition">
+            <span>🎙️ Bắt đầu Thu Âm Giọng Nói</span>
+          </button>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
+          <span class="text-xs font-semibold text-slate-300 block">2. Đọc văn bản tự động (AI Lồng Tiếng Việt)</span>
+          <textarea id="ttsTextInput" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white" placeholder="Nhập lời bình cần lồng tiếng...">Xin chào các bạn, hôm nay mình sẽ hướng dẫn chỉnh sửa video cực nhanh!</textarea>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-400">Cao độ (Pitch)</label>
+              <input id="ttsPitchInput" type="range" min="0.6" max="1.4" step="0.1" value="1.0" class="w-full" />
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400">Tốc độ đọc</label>
+              <input id="ttsRateInput" type="range" min="0.8" max="1.4" step="0.1" value="1.0" class="w-full" />
+            </div>
+          </div>
+          <div class="flex gap-1.5">
+            <button id="previewTtsBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-xs py-1.5 rounded border border-slate-700">🔊 Nghe thử</button>
+            <button id="addVoiceTrackBtn" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs py-1.5 rounded">+ Chèn vào Timeline</button>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
+          <span class="text-xs font-semibold text-slate-300 block">3. Nhạc nền & Hiệu ứng âm thanh (BGM)</span>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button data-sfx="upbeat" class="sfx-btn bg-slate-800 hover:bg-slate-700 text-xs py-1.5 px-2 rounded border border-slate-700">🎵 Beat Lo-Fi Chill</button>
+            <button data-sfx="cyber" class="sfx-btn bg-slate-800 hover:bg-slate-700 text-xs py-1.5 px-2 rounded border border-slate-700">⚡ Synthwave Bass</button>
+            <button data-sfx="whoosh" class="sfx-btn bg-slate-800 hover:bg-slate-700 text-xs py-1.5 px-2 rounded border border-slate-700">💨 Tiếng Whoosh</button>
+            <button data-sfx="ding" class="sfx-btn bg-slate-800 hover:bg-slate-700 text-xs py-1.5 px-2 rounded border border-slate-700">🔔 Tiếng Ding Pop</button>
+          </div>
+          <div class="pt-1">
+            <label class="text-[11px] text-slate-400">Âm lượng Nhạc nền / Synth: <span id="bgmVolVal">60</span>%</label>
+            <input id="bgmVolInput" type="range" min="0" max="100" value="60" class="w-full" />
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <span class="text-xs font-semibold text-slate-300">Danh sách Track Lồng Giọng / Audio</span>
+          <div id="voiceTrackList" class="space-y-1.5"></div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- CENTER PLAYER MONITOR (CANVAS PREVIEW) -->
+    <main class="flex-1 flex flex-col bg-[#0b0c10] min-w-0 relative">
+      <div class="flex-1 flex items-center justify-center p-3 overflow-hidden relative">
+        <div id="canvasContainer" class="relative shadow-2xl border border-slate-800 bg-black rounded-lg overflow-hidden flex items-center justify-center">
+          <canvas id="previewCanvas" width="800" height="450" class="max-w-full max-h-full block cursor-crosshair"></canvas>
+        </div>
+      </div>
+
+      <!-- PLAYER TRANSPORT CONTROLS -->
+      <div class="h-11 bg-[#141722] border-t border-slate-800 px-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <button id="stepBackBtn" class="p-1.5 rounded hover:bg-slate-800 text-slate-300 text-xs" title="Lùi 1 giây">⏮ -1s</button>
+          <button id="playPauseBtn" class="w-9 h-9 rounded-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold flex items-center justify-center shadow">
+            ▶
+          </button>
+          <button id="stepForwardBtn" class="p-1.5 rounded hover:bg-slate-800 text-slate-300 text-xs" title="Tiến 1 giây">+1s ⏭</button>
+          <span id="timecodeDisplay" class="text-xs font-mono text-cyan-400 ml-2">00:00.0 / 00:12.0</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="quickSplitBtn" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs px-2.5 py-1 rounded flex items-center gap-1">
+            <span>✂️ Tách Clip</span>
+          </button>
+          <button id="deleteSelectedClipBtn" class="bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/30 text-xs px-2.5 py-1 rounded flex items-center gap-1">
+            <span>🗑️ Xoá Clip đang chọn</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT INSPECTOR PANEL -->
+    <aside class="hidden xl:flex w-64 bg-[#161924] border-l border-slate-800 flex-col p-3 space-y-3 shrink-0 overflow-y-auto">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400">Thuộc Tính Clip Đang Chọn</h2>
+      <div id="inspectorBox" class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-2.5 text-xs">
+        <div>
+          <span class="text-slate-400 block text-[11px]">Tên Clip:</span>
+          <strong id="inspClipName" class="text-white">Cảnh 1: Cyber City Intro</strong>
+        </div>
+        <div>
+          <span class="text-slate-400 block text-[11px]">Thời lượng Clip:</span>
+          <div class="flex items-center gap-1.5 mt-1">
+            <input id="inspClipDuration" type="number" step="0.5" min="1" max="30" value="6" class="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white" />
+            <span class="text-slate-400">giây</span>
+            <button id="applyClipDurationBtn" class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-1 rounded">Áp dụng</button>
+          </div>
+        </div>
+        <div>
+          <label class="text-slate-400 block text-[11px]">Thu phóng khung hình (Scale): <span id="inspScaleVal">100</span>%</label>
+          <input id="inspScaleInput" type="range" min="60" max="150" value="100" class="w-full mt-1" />
+        </div>
+      </div>
+
+      <div class="p-2.5 rounded-lg bg-slate-900/70 border border-slate-800 space-y-1.5 text-[11px] text-slate-300">
+        <div class="font-bold text-white">💡 Hướng dẫn thao tác nhanh:</div>
+        <p>• <strong>Tách video:</strong> Di chuyển thanh đỏ tới giây muốn cắt rồi bấm <em>✂️ Tách Clip</em>.</p>
+        <p>• <strong>Xoá logo:</strong> Kéo khung đỏ trên màn hình đè lên vùng chữ/logo góc phải để xoá sạch.</p>
+        <p>• <strong>Nhãn dán:</strong> Click chọn sticker rồi kéo thả trực tiếp trên màn hình video.</p>
+        <p>• <strong>Render:</strong> Bấm <em>⚡ Xuất / Render Video</em> để xuất file `.webm` về máy.</p>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- BOTTOM MULTI-TRACK TIMELINE -->
+  <section class="h-56 bg-[#11131c] border-t border-slate-800 flex flex-col shrink-0 select-none">
+    <div class="h-8 bg-[#161925] border-b border-slate-800 px-3 flex items-center justify-between text-xs">
+      <div class="flex items-center gap-3">
+        <span class="font-bold text-slate-300">TIMELINE ĐA LỚP</span>
+        <span class="text-[11px] text-slate-400">(Click hoặc kéo trên thước thời gian để tua nhanh)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-[11px] text-slate-400">Zoom Timeline:</span>
+        <input id="timelineZoomInput" type="range" min="35" max="90" value="55" class="w-24" />
+      </div>
+    </div>
+
+    <div class="flex-1 flex overflow-hidden">
+      <div class="w-28 bg-[#151824] border-r border-slate-800 flex flex-col text-[11px] font-semibold text-slate-300 shrink-0">
+        <div class="h-6 border-b border-slate-800 px-2 flex items-center text-slate-500">Thước (Giây)</div>
+        <div class="h-10 border-b border-slate-800/80 px-2 flex items-center gap-1 text-amber-300">💬 Vietsub</div>
+        <div class="h-10 border-b border-slate-800/80 px-2 flex items-center gap-1 text-pink-300">✨ Nhãn Dán</div>
+        <div class="h-12 border-b border-slate-800/80 px-2 flex items-center gap-1 text-cyan-300">🎬 Video Chính</div>
+        <div class="h-10 px-2 flex items-center gap-1 text-emerald-300">🎙️ Lồng Giọng</div>
+      </div>
+
+      <div id="timelineScrollArea" class="flex-1 overflow-x-auto overflow-y-hidden relative timeline-grid bg-[#0e1017]">
+        <div id="timelineInner" class="relative h-full" style="width: 1200px;">
+          <div id="timeRuler" class="h-6 border-b border-slate-800 relative cursor-pointer bg-[#141722]/80"></div>
+          <div id="trackSubtitles" class="h-10 border-b border-slate-800/60 relative"></div>
+          <div id="trackStickers" class="h-10 border-b border-slate-800/60 relative"></div>
+          <div id="trackVideo" class="h-12 border-b border-slate-800/60 relative"></div>
+          <div id="trackVoice" class="h-10 relative"></div>
+
+          <div id="playheadLine" class="absolute top-0 bottom-0 w-0.5 bg-rose-500 pointer-events-none z-30" style="left: 0px;">
+            <div class="w-3 h-3 bg-rose-500 rotate-45 -ml-[5px] -mt-1 rounded-sm shadow"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RENDER / EXPORT MODAL -->
+  <div id="renderModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-[#161925] border border-slate-700 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">⚡ Xuất & Render Video</h3>
+        <button id="closeRenderModalBtn" class="text-slate-400 hover:text-white text-sm">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-slate-400 block mb-1">Độ phân giải</label>
+            <select id="exportResSelect" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-white">
+              <option value="720">HD 720p (Nhanh)</option>
+              <option value="1080" selected>Full HD 1080p (Chuẩn)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">Tốc độ khung hình</label>
+            <select id="exportFpsSelect" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-white">
+              <option value="30" selected>30 FPS</option>
+              <option value="60">60 FPS Mượt</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-2">
+          <div class="flex justify-between text-slate-300">
+            <span>Trạng thái Render:</span>
+            <span id="renderStatusText" class="text-cyan-400 font-semibold">Sẵn sàng</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="renderProgressBar" class="h-full capcut-gradient w-0 transition-all duration-150"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button id="startRenderBtn" class="capcut-gradient text-slate-950 font-bold text-xs px-4 py-2 rounded-lg shadow">
+          🚀 Bắt đầu Render Ngay
+        </button>
+        <a id="downloadRenderedLink" class="hidden bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg shadow cursor-pointer">
+          ⬇️ Tải Video (.webm)
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastBox" class="fixed bottom-5 right-5 bg-slate-900 border border-cyan-500/50 text-white px-4 py-2.5 rounded-lg shadow-xl text-xs font-medium opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+    Đã cập nhật!
+  </div>
+
+  <script>
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const offCanvas = document.createElement('canvas');
+    const offCtx = offCanvas.getContext('2d');
+
+    const state = {
+      isPlaying: false,
+      currentTime: 0,
+      pxPerSec: 55,
+      aspectRatio: '16:9',
+      selectedClipId: 'clip-1',
+      transition: 'fade',
+      vfx: 'none',
+      color: { brightness: 100, contrast: 100, saturation: 100, hue: 0, speed: 1.0 },
+      delogo: { enabled: true, showBox: true, mode: 'inpaint', x: 74, y: 8, w: 22, h: 12, strength: 18 },
+      subStyle: { color: '#ffea00', bgStyle: 'box', size: 26, yPercent: 85 },
+      clips: [
+        { id: 'clip-1', name: 'Cảnh 1: Cyber City Intro', type: 'procedural', theme: 'cyber', duration: 6.0, scale: 100, videoEl: null, trimOffset: 0 },
+        { id: 'clip-2', name: 'Cảnh 2: Đại Dương Hoàng Hôn', type: 'procedural', theme: 'ocean', duration: 6.0, scale: 100, videoEl: null, trimOffset: 0 }
+      ],
+      subtitles: [
+        { id: 'sub-1', text: 'Chào mừng đến với CapCut Web Studio Pro!', start: 0.2, end: 3.2 },
+        { id: 'sub-2', text: 'Tích hợp Vietsub, Xoá Logo AI & Nhãn Dán động', start: 3.4, end: 6.5 },
+        { id: 'sub-3', text: 'Tách ghép hiệu ứng & Lồng giọng cực mượt ngay trên Web!', start: 6.8, end: 11.5 }
+      ],
+      stickers: [
+        { id: 'stk-1', content: '🔥', x: 15, y: 20, size: 48, start: 0, end: 12 },
+        { id: 'stk-2', content: 'VIETSUB VIP 🇻🇳', x: 20, y: 12, size: 22, start: 0, end: 12 }
+      ],
+      voiceTracks: [
+        { id: 'voc-1', label: '🎙️ Lời bình mẫu: Giới thiệu CapCut Web', text: 'Chào mừng bạn đến với trình dựng video CapCut Web Studio', start: 0.5, duration: 4.0, audioUrl: null }
+      ],
+      bgmType: 'none',
+      bgmVolume: 60
+    };
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      box.textContent = msg;
+      box.classList.remove('opacity-0');
+      box.classList.add('opacity-100');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        box.classList.remove('opacity-100');
+        box.classList.add('opacity-0');
+      }, 2400);
+    }
+
+    function getTotalDuration() {
+      const sum = state.clips.reduce((acc, c) => acc + c.duration, 0);
+      return Math.max(sum, 1);
+    }
+
+    function getClipAtTime(t) {
+      let acc = 0;
+      for (let i = 0; i < state.clips.length; i++) {
+        const c = state.clips[i];
+        if (t >= acc && t <= acc + c.duration + 0.001) {
+          return { clip: c, index: i, localTime: t - acc, clipStart: acc };
+        }
+        acc += c.duration;
+      }
+      const last = state.clips[state.clips.length - 1];
+      return { clip: last, index: state.clips.length - 1, localTime: last ? last.duration : 0, clipStart: Math.max(0, acc - (last ? last.duration : 0)) };
+    }
+
+    function drawProceduralScene(targetCtx, w, h, theme, localTime, globalTime) {
+      targetCtx.save();
+      if (theme === 'cyber') {
+        const grad = targetCtx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, '#090426');
+        grad.addColorStop(0.55, '#2b094d');
+        grad.addColorStop(1, '#050716');
+        targetCtx.fillStyle = grad;
+        targetCtx.fillRect(0, 0, w, h);
+
+        const sunY = h * 0.42;
+        const sunGrad = targetCtx.createLinearGradient(0, sunY - 80, 0, sunY + 80);
+        sunGrad.addColorStop(0, '#ff007f');
+        sunGrad.addColorStop(1, '#ffbe0b');
+        targetCtx.fillStyle = sunGrad;
+        targetCtx.beginPath();
+        targetCtx.arc(w * 0.5, sunY, Math.min(w, h) * 0.22, 0, Math.PI * 2);
+        targetCtx.fill();
+
+        targetCtx.strokeStyle = 'rgba(0, 229, 255, 0.45)';
+        targetCtx.lineWidth = 1.5;
+        const horizon = h * 0.55;
+        for (let i = -10; i <= 10; i++) {
+          targetCtx.beginPath();
+          targetCtx.moveTo(w * 0.5 + i * 25, horizon);
+          targetCtx.lineTo(w * 0.5 + i * 160, h);
+          targetCtx.stroke();
+        }
+        const offset = (globalTime * 40) % 25;
+        for (let y = horizon; y < h; y += 22) {
+          const py = y + offset * ((y - horizon) / (h - horizon));
+          if (py < h) {
+            targetCtx.beginPath();
+            targetCtx.moveTo(0, py);
+            targetCtx.lineTo(w, py);
+            targetCtx.stroke();
+          }
+        }
+      } else if (theme === 'ocean') {
+        const sky = targetCtx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, '#0f172a');
+        sky.addColorStop(0.5, '#0284c7');
+        sky.addColorStop(1, '#0369a1');
+        targetCtx.fillStyle = sky;
+        targetCtx.fillRect(0, 0, w, h);
+
+        for (let layer = 0; layer < 4; layer++) {
+          targetCtx.fillStyle = `rgba(56, 189, 248, ${0.22 + layer * 0.15})`;
+          targetCtx.beginPath();
+          const baseH = h * (0.52 + layer * 0.1);
+          targetCtx.moveTo(0, h);
+          for (let x = 0; x <= w; x += 20) {
+            const waveY = baseH + Math.sin(x * 0.015 + globalTime * (2 + layer * 0.5)) * 16;
+            targetCtx.lineTo(x, waveY);
+          }
+          targetCtx.lineTo(w, h);
+          targetCtx.closePath();
+          targetCtx.fill();
+        }
+      } else if (theme === 'vlog') {
+        const bg = targetCtx.createLinearGradient(0, 0, w, h);
+        bg.addColorStop(0, '#1e1b4b');
+        bg.addColorStop(1, '#311042');
+        targetCtx.fillStyle = bg;
+        targetCtx.fillRect(0, 0, w, h);
+
+        const bars = 24;
+        const barW = (w * 0.6) / bars;
+        const startX = w * 0.2;
+        for (let i = 0; i < bars; i++) {
+          const amp = Math.abs(Math.sin(globalTime * 4 + i * 0.45)) * (h * 0.35) + 15;
+          targetCtx.fillStyle = i % 2 === 0 ? '#00e5ff' : '#a855f7';
+          targetCtx.fillRect(startX + i * barW, h * 0.55 - amp / 2, barW - 6, amp);
+        }
+      } else {
+        const bg = targetCtx.createLinearGradient(0, 0, w, h);
+        bg.addColorStop(0, '#042f2e');
+        bg.addColorStop(1, '#111827');
+        targetCtx.fillStyle = bg;
+        targetCtx.fillRect(0, 0, w, h);
+
+        for (let i = 0; i < 12; i++) {
+          const r = ((globalTime * 60 + i * 35) % (w * 0.45));
+          targetCtx.strokeStyle = `rgba(45, 212, 191, ${1 - r / (w * 0.45)})`;
+          targetCtx.lineWidth = 3;
+          targetCtx.beginPath();
+          targetCtx.arc(w / 2, h / 2, r, 0, Math.PI * 2);
+          targetCtx.stroke();
+        }
+      }
+
+      const logoX = w * 0.76;
+      const logoY = h * 0.10;
+      targetCtx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      targetCtx.font = `bold ${Math.round(w * 0.022)}px Inter, sans-serif`;
+      targetCtx.fillText('🎵 LOGO MẪU @ID', logoX, logoY + 22);
+      targetCtx.font = `${Math.round(w * 0.015)}px Inter, sans-serif`;
+      targetCtx.fillStyle = 'rgba(0, 229, 255, 0.9)';
+      targetCtx.fillText('WATERMARK DEMO', logoX, logoY + 40);
+
+      targetCtx.restore();
+    }
+
+    function renderCurrentFrame() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const info = getClipAtTime(state.currentTime);
+      const activeClip = info.clip;
+      if (!activeClip) return;
+
+      ctx.save();
+      const filterStr = `brightness(${state.color.brightness}%) contrast(${state.color.contrast}%) saturate(${state.color.saturation}%) hue-rotate(${state.color.hue}deg)`;
+      ctx.filter = filterStr;
+
+      let shakeX = 0;
+      let shakeY = 0;
+      if (state.vfx === 'shake') {
+        shakeX = Math.sin(state.currentTime * 35) * 8;
+        shakeY = Math.cos(state.currentTime * 42) * 6;
+      }
+
+      const scaleFactor = (activeClip.scale || 100) / 100;
+      ctx.translate(w / 2 + shakeX, h / 2 + shakeY);
+      ctx.scale(scaleFactor, scaleFactor);
+      ctx.translate(-w / 2, -h / 2);
+
+      if (activeClip.type === 'video' && activeClip.videoEl && activeClip.videoEl.readyState >= 2) {
+        const vw = activeClip.videoEl.videoWidth || w;
+        const vh = activeClip.videoEl.videoHeight || h;
+        const scale = Math.min(w / vw, h / vh);
+        const dw = vw * scale;
+        const dh = vh * scale;
+        ctx.drawImage(activeClip.videoEl, (w - dw) / 2, (h - dh) / 2, dw, dh);
+      } else {
+        drawProceduralScene(ctx, w, h, activeClip.theme || 'cyber', info.localTime, state.currentTime);
+      }
+      ctx.restore();
+
+      if (info.index > 0 && info.localTime < 0.45 && state.transition !== 'none') {
+        const p = info.localTime / 0.45;
+        ctx.save();
+        if (state.transition === 'fade') {
+          ctx.fillStyle = `rgba(0, 0, 0, ${1 - p})`;
+          ctx.fillRect(0, 0, w, h);
+        } else if (state.transition === 'flash') {
+          ctx.fillStyle = `rgba(255, 255, 255, ${(1 - p) * 0.9})`;
+          ctx.fillRect(0, 0, w, h);
+        } else if (state.transition === 'slide') {
+          ctx.fillStyle = 'rgba(0, 229, 255, 0.25)';
+          ctx.fillRect(0, 0, w * (1 - p), h);
+        } else if (state.transition === 'zoom') {
+          ctx.strokeStyle = `rgba(0, 229, 255, ${1 - p})`;
+          ctx.lineWidth = 12 * (1 - p);
+          ctx.strokeRect(0, 0, w, h);
+        }
+        ctx.restore();
+      }
+
+      if (state.delogo.enabled) {
+        const rx = Math.round((state.delogo.x / 100) * w);
+        const ry = Math.round((state.delogo.y / 100) * h);
+        const rw = Math.round((state.delogo.w / 100) * w);
+        const rh = Math.round((state.delogo.h / 100) * h);
+        const strength = state.delogo.strength;
+
+        ctx.save();
+        if (state.delogo.mode === 'inpaint') {
+          const sampleY = Math.max(0, ry - 6);
+          ctx.drawImage(canvas, rx, sampleY, rw, 4, rx, ry, rw, rh);
+          const sampleX = Math.max(0, rx - 6);
+          ctx.globalAlpha = 0.55;
+          ctx.drawImage(canvas, sampleX, ry, 4, rh, rx, ry, rw, rh);
+          ctx.globalAlpha = 1.0;
+        } else if (state.delogo.mode === 'blur') {
+          ctx.beginPath();
+          ctx.rect(rx, ry, rw, rh);
+          ctx.clip();
+          ctx.filter = `blur(${Math.max(4, Math.round(strength / 2))}px)`;
+          ctx.drawImage(canvas, 0, 0);
+          ctx.filter = 'none';
+        } else if (state.delogo.mode === 'pixelate') {
+          const blockSize = Math.max(6, Math.round(strength / 1.5));
+          const sw = Math.max(1, Math.floor(rw / blockSize));
+          const sh = Math.max(1, Math.floor(rh / blockSize));
+          offCanvas.width = sw;
+          offCanvas.height = sh;
+          offCtx.imageSmoothingEnabled = false;
+          offCtx.drawImage(canvas, rx, ry, rw, rh, 0, 0, sw, sh);
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(offCanvas, 0, 0, sw, sh, rx, ry, rw, rh);
+          ctx.imageSmoothingEnabled = true;
+        }
+        ctx.restore();
+      }
+
+      if (state.delogo.enabled && state.delogo.showBox && !state.isRendering) {
+        const rx = Math.round((state.delogo.x / 100) * w);
+        const ry = Math.round((state.delogo.y / 100) * h);
+        const rw = Math.round((state.delogo.w / 100) * w);
+        const rh = Math.round((state.delogo.h / 100) * h);
+        ctx.save();
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.strokeRect(rx, ry, rw, rh);
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.85)';
+        ctx.font = 'bold 11px Inter, sans-serif';
+        ctx.fillText('🪄 VÙNG XOÁ LOGO (Kéo để di chuyển)', rx + 4, Math.max(14, ry - 6));
+        ctx.restore();
+      }
+
+      if (state.vfx !== 'none') {
+        ctx.save();
+        if (state.vfx === 'glitch') {
+          const sliceH = 24;
+          const sy = Math.floor((Math.sin(state.currentTime * 19) * 0.5 + 0.5) * (h - sliceH));
+          ctx.drawImage(canvas, 0, sy, w, sliceH, 12, sy, w, sliceH);
+          ctx.fillStyle = 'rgba(0, 229, 255, 0.12)';
+          ctx.fillRect(0, sy, w, sliceH);
+        } else if (state.vfx === 'vhs') {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+          for (let y = 0; y < h; y += 4) {
+            ctx.fillRect(0, y, w, 1.5);
+          }
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.font = 'monospace 14px Inter';
+          ctx.fillText('PLAY ▶  VHS 1998', 24, 36);
+        } else if (state.vfx === 'cinema') {
+          const barH = Math.round(h * 0.11);
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(0, 0, w, barH);
+          ctx.fillRect(0, h - barH, w, barH);
+        } else if (state.vfx === 'neon') {
+          const grad = ctx.createRadialGradient(w / 2, h / 2, w * 0.2, w / 2, h / 2, w * 0.6);
+          grad.addColorStop(0, 'rgba(0,0,0,0)');
+          grad.addColorStop(1, 'rgba(124, 58, 237, 0.38)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, w, h);
+        }
+        ctx.restore();
+      }
+
+      state.stickers.forEach(stk => {
+        if (state.currentTime >= stk.start && state.currentTime <= stk.end) {
+          ctx.save();
+          const sx = (stk.x / 100) * w;
+          const sy = (stk.y / 100) * h;
+          const bounce = 1 + Math.sin(state.currentTime * 6) * 0.05;
+          ctx.translate(sx, sy);
+          ctx.scale(bounce, bounce);
+          if (stk.content.length > 4) {
+            ctx.font = `800 ${stk.size}px Inter, sans-serif`;
+            const metrics = ctx.measureText(stk.content);
+            const padX = 14;
+            const padY = 8;
+            ctx.fillStyle = 'rgba(225, 29, 72, 0.92)';
+            ctx.beginPath();
+            ctx.roundRect(-metrics.width / 2 - padX, -stk.size / 2 - padY, metrics.width + padX * 2, stk.size + padY * 2, 8);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(stk.content, 0, 2);
+          } else {
+            ctx.font = `${stk.size}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(stk.content, 0, 0);
+          }
+          ctx.restore();
+        }
+      });
+
+      const activeSubs = state.subtitles.filter(s => state.currentTime >= s.start && state.currentTime <= s.end);
+      activeSubs.forEach((sub, idx) => {
+        ctx.save();
+        const fontSize = state.subStyle.size;
+        ctx.font = `700 ${fontSize}px Inter, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const textX = w / 2;
+        const textY = (state.subStyle.yPercent / 100) * h - idx * (fontSize + 16);
+        const metrics = ctx.measureText(sub.text);
+        const boxW = metrics.width + 28;
+        const boxH = fontSize + 16;
+
+        if (state.subStyle.bgStyle === 'box') {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
+          ctx.beginPath();
+          ctx.roundRect(textX - boxW / 2, textY - boxH / 2, boxW, boxH, 8);
+          ctx.fill();
+        } else if (state.subStyle.bgStyle === 'neon') {
+          ctx.shadowColor = '#00e5ff';
+          ctx.shadowBlur = 14;
+        }
+
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#000000';
+        ctx.strokeText(sub.text, textX, textY);
+
+        ctx.fillStyle = state.subStyle.color;
+        ctx.fillText(sub.text, textX, textY);
+        ctx.restore();
+      });
+    }
+
+    function renderAllUI() {
+      const totalDur = getTotalDuration();
+      document.getElementById('clipCountBadge').textContent = `${state.clips.length} clips`;
+      document.getElementById('timecodeDisplay').textContent = `${formatTime(state.currentTime)} / ${formatTime(totalDur)}`;
+
+      const clipListEl = document.getElementById('mediaClipList');
+      clipListEl.innerHTML = '';
+      let accStart = 0;
+      state.clips.forEach((clip, idx) => {
+        const isSel = clip.id === state.selectedClipId;
+        const row = document.createElement('div');
+        row.className = `p-2 rounded-lg border text-xs flex items-center justify-between cursor-pointer transition ${isSel ? 'bg-cyan-500/15 border-cyan-400 text-white' : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'}`;
+        row.innerHTML = `
+          <div class="truncate pr-2">
+            <div class="font-semibold truncate">${idx + 1}. ${clip.name}</div>
+            <div class="text-[11px] text-slate-400">${accStart.toFixed(1)}s → ${(accStart + clip.duration).toFixed(1)}s (${clip.duration.toFixed(1)}s)</div>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button data-move-up="${idx}" class="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 rounded text-[11px]" title="Đẩy lên">↑</button>
+            <button data-del-clip="${clip.id}" class="px-1.5 py-0.5 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 rounded text-[11px]" title="Xoá">✕</button>
+          </div>
+        `;
+        row.addEventListener('click', (e) => {
+          if (e.target.closest('button')) return;
+          state.selectedClipId = clip.id;
+          updateInspector();
+          renderAllUI();
+        });
+        clipListEl.appendChild(row);
+        accStart += clip.duration;
+      });
+
+      clipListEl.querySelectorAll('[data-move-up]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = parseInt(btn.getAttribute('data-move-up'), 10);
+          if (i > 0) {
+            const tmp = state.clips[i - 1];
+            state.clips[i - 1] = state.clips[i];
+            state.clips[i] = tmp;
+            renderAllUI();
+            renderCurrentFrame();
+          }
+        });
+      });
+      clipListEl.querySelectorAll('[data-del-clip]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-del-clip');
+          if (state.clips.length <= 1) {
+            showToast('Cần giữ lại ít nhất 1 clip trên timeline!');
+            return;
+          }
+          state.clips = state.clips.filter(c => c.id !== id);
+          if (state.selectedClipId === id) state.selectedClipId = state.clips[0].id;
+          state.currentTime = Math.min(state.currentTime, getTotalDuration());
+          renderAllUI();
+          renderCurrentFrame();
+        });
+      });
+
+      const subContainer = document.getElementById('subtitleListContainer');
+      subContainer.innerHTML = '';
+      state.subtitles.forEach(sub => {
+        const item = document.createElement('div');
+        item.className = 'p-2 rounded bg-slate-900 border border-slate-800 text-xs flex items-center justify-between gap-2';
+        item.innerHTML = `
+          <div class="truncate">
+            <div class="font-medium text-amber-300 truncate">"${sub.text}"</div>
+            <div class="text-[10px] text-slate-400">${sub.start.toFixed(1)}s - ${sub.end.toFixed(1)}s</div>
+          </div>
+          <button data-del-sub="${sub.id}" class="text-rose-400 hover:text-rose-300 px-1.5 py-0.5 rounded bg-slate-800">✕</button>
+        `;
+        item.addEventListener('click', (e) => {
+          if (e.target.closest('button')) return;
+          state.currentTime = sub.start + 0.05;
+          syncVideoElementsToTime();
+          renderCurrentFrame();
+          updatePlayheadUI();
+        });
+        subContainer.appendChild(item);
+      });
+      subContainer.querySelectorAll('[data-del-sub]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-del-sub');
+          state.subtitles = state.subtitles.filter(s => s.id !== id);
+          renderAllUI();
+          renderCurrentFrame();
+        });
+      });
+
+      const stkContainer = document.getElementById('activeStickersList');
+      stkContainer.innerHTML = '';
+      state.stickers.forEach(stk => {
+        const el = document.createElement('div');
+        el.className = 'p-2 rounded bg-slate-900 border border-slate-800 text-xs flex items-center justify-between';
+        el.innerHTML = `
+          <span>Nhãn: <strong>${stk.content}</strong> (${stk.start.toFixed(1)}s-${stk.end.toFixed(1)}s)</span>
+          <button data-del-stk="${stk.id}" class="text-rose-400 hover:text-rose-300 px-1.5 py-0.5 rounded bg-slate-800">✕</button>
+        `;
+        stkContainer.appendChild(el);
+      });
+      stkContainer.querySelectorAll('[data-del-stk]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-del-stk');
+          state.stickers = state.stickers.filter(s => s.id !== id);
+          renderAllUI();
+          renderCurrentFrame();
+        });
+      });
+
+      const vocContainer = document.getElementById('voiceTrackList');
+      vocContainer.innerHTML = '';
+      state.voiceTracks.forEach(voc => {
+        const el = document.createElement('div');
+        el.className = 'p-2 rounded bg-slate-900 border border-slate-800 text-xs flex items-center justify-between';
+        el.innerHTML = `
+          <div class="truncate">
+            <div class="text-emerald-300 font-medium truncate">${voc.label}</div>
+            <div class="text-[10px] text-slate-400">Bắt đầu: ${voc.start.toFixed(1)}s (${voc.duration.toFixed(1)}s)</div>
+          </div>
+          <button data-del-voc="${voc.id}" class="text-rose-400 hover:text-rose-300 px-1.5 py-0.5 rounded bg-slate-800">✕</button>
+        `;
+        vocContainer.appendChild(el);
+      });
+      vocContainer.querySelectorAll('[data-del-voc]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-del-voc');
+          state.voiceTracks = state.voiceTracks.filter(v => v.id !== id);
+          renderAllUI();
+        });
+      });
+
+      renderTimelineTracks();
+      updateInspector();
+    }
+
+    function renderTimelineTracks() {
+      const totalDur = getTotalDuration();
+      const px = state.pxPerSec;
+      const totalWidth = Math.max(900, Math.ceil((totalDur + 4) * px));
+      const inner = document.getElementById('timelineInner');
+      inner.style.width = `${totalWidth}px`;
+
+      const ruler = document.getElementById('timeRuler');
+      ruler.innerHTML = '';
+      const maxSec = Math.ceil(totalDur + 3);
+      for (let s = 0; s <= maxSec; s++) {
+        const tick = document.createElement('div');
+        tick.className = 'absolute top-0 bottom-0 border-l border-slate-700 text-[10px] text-slate-400 pl-1 pt-0.5 pointer-events-none';
+        tick.style.left = `${s * px}px`;
+        tick.textContent = `${s}s`;
+        ruler.appendChild(tick);
+      }
+
+      const tSub = document.getElementById('trackSubtitles');
+      tSub.innerHTML = '';
+      state.subtitles.forEach(sub => {
+        const bar = document.createElement('div');
+        bar.className = 'absolute top-1.5 h-7 rounded bg-amber-500/25 border border-amber-400/60 text-amber-200 text-[11px] px-2 flex items-center truncate cursor-pointer';
+        bar.style.left = `${sub.start * px}px`;
+        bar.style.width = `${Math.max(24, (sub.end - sub.start) * px)}px`;
+        bar.textContent = `💬 ${sub.text}`;
+        bar.addEventListener('click', () => {
+          state.currentTime = sub.start;
+          syncVideoElementsToTime();
+          renderCurrentFrame();
+          updatePlayheadUI();
+        });
+        tSub.appendChild(bar);
+      });
+
+      const tStk = document.getElementById('trackStickers');
+      tStk.innerHTML = '';
+      state.stickers.forEach(stk => {
+        const bar = document.createElement('div');
+        bar.className = 'absolute top-1.5 h-7 rounded bg-pink-500/25 border border-pink-400/60 text-pink-200 text-[11px] px-2 flex items-center truncate';
+        bar.style.left = `${stk.start * px}px`;
+        bar.style.width = `${Math.max(24, (stk.end - stk.start) * px)}px`;
+        bar.textContent = `${stk.content}`;
+        tStk.appendChild(bar);
+      });
+
+      const tVid = document.getElementById('trackVideo');
+      tVid.innerHTML = '';
+      let curX = 0;
+      state.clips.forEach((clip) => {
+        const w = Math.max(20, clip.duration * px);
+        const block = document.createElement('div');
+        const isSel = clip.id === state.selectedClipId;
+        block.className = `absolute top-1 h-10 rounded-md bg-gradient-to-r from-cyan-900/80 to-indigo-900/80 border border-cyan-500/50 px-2.5 flex items-center justify-between text-xs text-white cursor-pointer overflow-hidden ${isSel ? 'clip-selected' : ''}`;
+        block.style.left = `${curX}px`;
+        block.style.width = `${w}px`;
+        block.innerHTML = `<span class="font-semibold truncate">${clip.name}</span><span class="text-[10px] text-cyan-300 ml-1">${clip.duration.toFixed(1)}s</span>`;
+        block.addEventListener('click', () => {
+          state.selectedClipId = clip.id;
+          renderAllUI();
+        });
+        tVid.appendChild(block);
+        curX += w;
+      });
+
+      const tVoc = document.getElementById('trackVoice');
+      tVoc.innerHTML = '';
+      state.voiceTracks.forEach(voc => {
+        const bar = document.createElement('div');
+        bar.className = 'absolute top-1.5 h-7 rounded bg-emerald-500/25 border border-emerald-400/60 text-emerald-200 text-[11px] px-2 flex items-center truncate';
+        bar.style.left = `${voc.start * px}px`;
+        bar.style.width = `${Math.max(30, voc.duration * px)}px`;
+        bar.textContent = voc.label;
+        tVoc.appendChild(bar);
+      });
+
+      updatePlayheadUI();
+    }
+
+    function updatePlayheadUI() {
+      const line = document.getElementById('playheadLine');
+      line.style.left = `${state.currentTime * state.pxPerSec}px`;
+      document.getElementById('timecodeDisplay').textContent = `${formatTime(state.currentTime)} / ${formatTime(getTotalDuration())}`;
+    }
+
+    function updateInspector() {
+      const clip = state.clips.find(c => c.id === state.selectedClipId) || state.clips[0];
+      if (!clip) return;
+      document.getElementById('inspClipName').textContent = clip.name;
+      document.getElementById('inspClipDuration').value = clip.duration;
+      document.getElementById('inspScaleInput').value = clip.scale || 100;
+      document.getElementById('inspScaleVal').textContent = clip.scale || 100;
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = (sec % 60).toFixed(1).padStart(4, '0');
+      return `${String(m).padStart(2, '0')}:${s}`;
+    }
+
+    let lastFrameTs = null;
+    let rafId = null;
+
+    function syncVideoElementsToTime() {
+      const info = getClipAtTime(state.currentTime);
+      if (info.clip && info.clip.type === 'video' && info.clip.videoEl) {
+        const targetVidTime = (info.clip.trimOffset || 0) + info.localTime;
+        if (Math.abs(info.clip.videoEl.currentTime - targetVidTime) > 0.25) {
+          info.clip.videoEl.currentTime = targetVidTime;
+        }
+      }
+    }
+
+    function stepLoop(ts) {
+      if (!state.isPlaying) return;
+      if (!lastFrameTs) lastFrameTs = ts;
+      const dt = ((ts - lastFrameTs) / 1000) * state.color.speed;
+      lastFrameTs = ts;
+
+      const totalDur = getTotalDuration();
+      state.currentTime += dt;
+
+      if (state.currentTime >= totalDur) {
+        state.currentTime = 0;
+        pausePlayback();
+        renderCurrentFrame();
+        updatePlayheadUI();
+        return;
+      }
+
+      syncVideoElementsToTime();
+      renderCurrentFrame();
+      updatePlayheadUI();
+      rafId = requestAnimationFrame(stepLoop);
+    }
+
+    function startPlayback() {
+      if (state.currentTime >= getTotalDuration()) state.currentTime = 0;
+      state.isPlaying = true;
+      lastFrameTs = null;
+      document.getElementById('playPauseBtn').textContent = '⏸';
+      const info = getClipAtTime(state.currentTime);
+      if (info.clip && info.clip.type === 'video' && info.clip.videoEl) {
+        info.clip.videoEl.play().catch(() => {});
+      }
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(stepLoop);
+    }
+
+    function pausePlayback() {
+      state.isPlaying = false;
+      document.getElementById('playPauseBtn').textContent = '▶';
+      state.clips.forEach(c => {
+        if (c.videoEl) c.videoEl.pause();
+      });
+      if (rafId) cancelAnimationFrame(rafId);
+    }
+
+    function splitClipAtPlayhead() {
+      const info = getClipAtTime(state.currentTime);
+      if (!info.clip) return;
+      if (info.localTime < 0.4 || info.localTime > info.clip.duration - 0.4) {
+        showToast('Hãy đặt thanh đỏ vào giữa clip (cách mép ít nhất 0.5s) để tách!');
+        return;
+      }
+      const orig = info.clip;
+      const firstDur = Number(info.localTime.toFixed(2));
+      const secondDur = Number((orig.duration - firstDur).toFixed(2));
+
+      orig.duration = firstDur;
+      const secondClip = {
+        id: 'clip-' + Date.now(),
+        name: orig.name + ' (Phần 2)',
+        type: orig.type,
+        theme: orig.theme,
+        duration: secondDur,
+        scale: orig.scale,
+        videoEl: orig.videoEl,
+        trimOffset: (orig.trimOffset || 0) + firstDur
+      };
+
+      state.clips.splice(info.index + 1, 0, secondClip);
+      state.selectedClipId = secondClip.id;
+      renderAllUI();
+      renderCurrentFrame();
+      showToast('✂️ Đã tách clip thành 2 phần tại vị trí con trỏ!');
+    }
+
+    let audioCtx = null;
+    function ensureAudioCtx() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSoundEffect(type) {
+      ensureAudioCtx();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const vol = (state.bgmVolume / 100) * 0.25;
+      gain.gain.setValueAtTime(vol, now);
+
+      if (type === 'ding') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(1320, now + 0.25);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'whoosh') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.35);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else {
+        osc.type = type === 'cyber' ? 'sawtooth' : 'sine';
+        osc.frequency.setValueAtTime(type === 'cyber' ? 110 : 261.6, now);
+        osc.frequency.setValueAtTime(type === 'cyber' ? 146.8 : 329.6, now + 0.2);
+        osc.frequency.setValueAtTime(type === 'cyber' ? 164.8 : 392.0, now + 0.4);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.8);
+      }
+    }
+
+    let dragMode = null;
+    let draggedSticker = null;
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = ((e.clientX - rect.left) / rect.width) * 100;
+      const my = ((e.clientY - rect.top) / rect.height) * 100;
+
+      if (state.delogo.enabled && state.delogo.showBox) {
+        if (mx >= state.delogo.x && mx <= state.delogo.x + state.delogo.w &&
+            my >= state.delogo.y && my <= state.delogo.y + state.delogo.h) {
+          dragMode = 'delogo';
+          return;
+        }
+      }
+
+      for (let i = state.stickers.length - 1; i >= 0; i--) {
+        const stk = state.stickers[i];
+        if (state.currentTime >= stk.start && state.currentTime <= stk.end) {
+          if (Math.abs(mx - stk.x) < 10 && Math.abs(my - stk.y) < 10) {
+            dragMode = 'sticker';
+            draggedSticker = stk;
+            return;
+          }
+        }
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!dragMode) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = Math.max(0, Math.min(95, ((e.clientX - rect.left) / rect.width) * 100));
+      const my = Math.max(0, Math.min(95, ((e.clientY - rect.top) / rect.height) * 100));
+
+      if (dragMode === 'delogo') {
+        state.delogo.x = Math.round(Math.max(0, Math.min(100 - state.delogo.w, mx - state.delogo.w / 2)));
+        state.delogo.y = Math.round(Math.max(0, Math.min(100 - state.delogo.h, my - state.delogo.h / 2)));
+        document.getElementById('delogoXInput').value = state.delogo.x;
+        document.getElementById('delogoXVal').textContent = state.delogo.x;
+        document.getElementById('delogoYInput').value = state.delogo.y;
+        document.getElementById('delogoYVal').textContent = state.delogo.y;
+        renderCurrentFrame();
+      } else if (dragMode === 'sticker' && draggedSticker) {
+        draggedSticker.x = Math.round(mx);
+        draggedSticker.y = Math.round(my);
+        renderCurrentFrame();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      dragMode = null;
+      draggedSticker = null;
+    });
+
+    document.querySelectorAll('.tool-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tool-tab-btn').forEach(b => {
+          b.className = 'tool-tab-btn w-14 sm:w-16 py-2 rounded-lg flex flex-col items-center gap-1 text-slate-400 hover:text-white hover:bg-slate-800/60 text-[11px] font-medium';
+        });
+        btn.className = 'tool-tab-btn w-14 sm:w-16 py-2 rounded-lg flex flex-col items-center gap-1 text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 text-[11px] font-medium';
+
+        document.querySelectorAll('.tool-panel').forEach(p => p.classList.add('hidden'));
+        document.getElementById(`panel-${tab}`).classList.remove('hidden');
+      });
+    });
+
+    function setAspectRatio(ratio, w, h, activeBtnId) {
+      state.aspectRatio = ratio;
+      canvas.width = w;
+      canvas.height = h;
+      ['ratio169Btn', 'ratio916Btn', 'ratio11Btn'].forEach(id => {
+        const b = document.getElementById(id);
+        if (id === activeBtnId) {
+          b.className = 'px-2 py-1 text-xs rounded bg-cyan-500 text-slate-950 font-semibold transition';
+        } else {
+          b.className = 'px-2 py-1 text-xs rounded text-slate-300 hover:bg-slate-800 transition';
+        }
+      });
+      renderCurrentFrame();
+      showToast(`Đã chuyển khung hình sang ${ratio}`);
+    }
+    document.getElementById('ratio169Btn').addEventListener('click', () => setAspectRatio('16:9', 800, 450, 'ratio169Btn'));
+    document.getElementById('ratio916Btn').addEventListener('click', () => setAspectRatio('9:16', 405, 720, 'ratio916Btn'));
+    document.getElementById('ratio11Btn').addEventListener('click', () => setAspectRatio('1:1', 540, 540, 'ratio11Btn'));
+
+    document.getElementById('uploadVideoInput').addEventListener('change', (e) => {
+      const files = Array.from(e.target.files || []);
+      files.forEach(file => {
+        const url = URL.createObjectURL(file);
+        const vid = document.createElement('video');
+        vid.src = url;
+        vid.muted = false;
+        vid.playsInline = true;
+        vid.preload = 'auto';
+        vid.addEventListener('loadedmetadata', () => {
+          const dur = Math.min(30, Math.max(2, Number((vid.duration || 6).toFixed(1))));
+          const newClip = {
+            id: 'clip-' + Date.now() + Math.random().toString(36).slice(2, 5),
+            name: file.name,
+            type: 'video',
+            theme: 'cyber',
+            duration: dur,
+            scale: 100,
+            videoEl: vid,
+            trimOffset: 0
+          };
+          state.clips.push(newClip);
+          state.selectedClipId = newClip.id;
+          renderAllUI();
+          renderCurrentFrame();
+          showToast(`🎬 Đã thêm video "${file.name}" vào Timeline!`);
+        });
+      });
+    });
+
+    function addProceduralClip(name, theme) {
+      const c = {
+        id: 'clip-' + Date.now(),
+        name,
+        type: 'procedural',
+        theme,
+        duration: 5.0,
+        scale: 100,
+        videoEl: null,
+        trimOffset: 0
+      };
+      state.clips.push(c);
+      state.selectedClipId = c.id;
+      renderAllUI();
+      renderCurrentFrame();
+      showToast(`Đã ghép thêm "${name}" vào cuối Timeline!`);
+    }
+    document.getElementById('addCyberSceneBtn').addEventListener('click', () => addProceduralClip('Cảnh Neon Cyberpunk', 'cyber'));
+    document.getElementById('addNatureSceneBtn').addEventListener('click', () => addProceduralClip('Cảnh Sóng Biển', 'ocean'));
+    document.getElementById('addStudioSceneBtn').addEventListener('click', () => addProceduralClip('Cảnh Sóng Nhạc Vlog', 'vlog'));
+    document.getElementById('addIntroSceneBtn').addEventListener('click', () => addProceduralClip('Cảnh Vòng Xoáy Intro', 'intro'));
+
+    document.getElementById('resetDemoBtn').addEventListener('click', () => {
+      pausePlayback();
+      state.currentTime = 0;
+      state.vfx = 'none';
+      state.delogo.enabled = true;
+      state.delogo.x = 74;
+      state.delogo.y = 8;
+      renderAllUI();
+      renderCurrentFrame();
+      showToast('Đã khôi phục dự án mẫu ban đầu!');
+    });
+
+    document.getElementById('playPauseBtn').addEventListener('click', () => {
+      if (state.isPlaying) pausePlayback();
+      else startPlayback();
+    });
+    document.getElementById('stepBackBtn').addEventListener('click', () => {
+      pausePlayback();
+      state.currentTime = Math.max(0, state.currentTime - 1);
+      syncVideoElementsToTime();
+      renderCurrentFrame();
+      updatePlayheadUI();
+    });
+    document.getElementById('stepForwardBtn').addEventListener('click', () => {
+      pausePlayback();
+      state.currentTime = Math.min(getTotalDuration(), state.currentTime + 1);
+      syncVideoElementsToTime();
+      renderCurrentFrame();
+      updatePlayheadUI();
+    });
+    document.getElementById('quickSplitBtn').addEventListener('click', splitClipAtPlayhead);
+    document.getElementById('splitAtPlayheadLeftBtn').addEventListener('click', splitClipAtPlayhead);
+
+    document.getElementById('deleteSelectedClipBtn').addEventListener('click', () => {
+      if (state.clips.length <= 1) {
+        showToast('Không thể xoá clip duy nhất trên Timeline!');
+        return;
+      }
+      state.clips = state.clips.filter(c => c.id !== state.selectedClipId);
+      state.selectedClipId = state.clips[0].id;
+      state.currentTime = Math.min(state.currentTime, getTotalDuration());
+      renderAllUI();
+      renderCurrentFrame();
+      showToast('🗑️ Đã xoá clip đang chọn!');
+    });
+
+    document.getElementById('transitionSelect').addEventListener('change', (e) => {
+      state.transition = e.target.value;
+      renderCurrentFrame();
+      showToast(`Đã chọn hiệu ứng chuyển cảnh: ${e.target.options[e.target.selectedIndex].text}`);
+    });
+
+    document.getElementById('setSubFromPlayheadBtn').addEventListener('click', () => {
+      const st = Number(state.currentTime.toFixed(1));
+      document.getElementById('subStartInput').value = st;
+      document.getElementById('subEndInput').value = Number((st + 3.0).toFixed(1));
+    });
+
+    document.getElementById('addSubtitleBtn').addEventListener('click', () => {
+      const text = document.getElementById('subTextInput').value.trim();
+      const start = parseFloat(document.getElementById('subStartInput').value) || 0;
+      const end = parseFloat(document.getElementById('subEndInput').value) || (start + 3);
+      if (!text) {
+        showToast('Vui lòng nhập nội dung câu Vietsub!');
+        return;
+      }
+      state.subtitles.push({
+        id: 'sub-' + Date.now(),
+        text,
+        start,
+        end: Math.max(start + 0.5, end)
+      });
+      renderAllUI();
+      renderCurrentFrame();
+      showToast('💬 Đã thêm phụ đề Vietsub vào Timeline!');
+    });
+
+    document.getElementById('autoVietsubBtn').addEventListener('click', () => {
+      const total = getTotalDuration();
+      state.subtitles = [
+        { id: 'sub-a1', text: '🔥 Hôm nay mình chia sẻ bí kíp dựng video triệu view!', start: 0.2, end: Math.min(3.5, total) },
+        { id: 'sub-a2', text: '✨ Xoá logo watermark chỉ với 1 cú kéo chuột', start: 3.6, end: Math.min(7.2, total) },
+        { id: 'sub-a3', text: '🚀 Bấm Xuất Video để tải ngay bản Full HD về máy nhé!', start: 7.4, end: total }
+      ];
+      renderAllUI();
+      renderCurrentFrame();
+      showToast('✨ Đã tạo tự động bộ Vietsub khớp thời lượng video!');
+    });
+
+    document.getElementById('subColorInput').addEventListener('input', (e) => {
+      state.subStyle.color = e.target.value;
+      renderCurrentFrame();
+    });
+    document.getElementById('subBgStyleSelect').addEventListener('change', (e) => {
+      state.subStyle.bgStyle = e.target.value;
+      renderCurrentFrame();
+    });
+    document.getElementById('subSizeInput').addEventListener('input', (e) => {
+      state.subStyle.size = parseInt(e.target.value, 10);
+      document.getElementById('subSizeVal').textContent = state.subStyle.size;
+      renderCurrentFrame();
+    });
+    document.getElementById('subYInput').addEventListener('input', (e) => {
+      state.subStyle.yPercent = parseInt(e.target.value, 10);
+      document.getElementById('subYVal').textContent = state.subStyle.yPercent;
+      renderCurrentFrame();
+    });
+
+    document.getElementById('exportSrtBtn').addEventListener('click', () => {
+      let srt = '';
+      state.subtitles.forEach((s, i) => {
+        srt += `${i + 1}\n00:00:${String(Math.floor(s.start)).padStart(2, '0')},000 --> 00:00:${String(Math.floor(s.end)).padStart(2, '0')},500\n${s.text}\n\n`;
+      });
+      const blob = new Blob([srt], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'vietsub_capcut.srt';
+      a.click();
+      showToast('📤 Đã tải xuống file phụ đề vietsub_capcut.srt!');
+    });
+
+    document.getElementById('importSrtInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const lines = String(reader.result).split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        const imported = [];
+        let t = 0;
+        lines.forEach(line => {
+          if (!/^\d+$/.test(line) && !line.includes('-->')) {
+            imported.push({ id: 'sub-' + Date.now() + imported.length, text: line, start: t, end: t + 3 });
+            t += 3.2;
+          }
+        });
+        if (imported.length > 0) {
+          state.subtitles = imported;
+          renderAllUI();
+          renderCurrentFrame();
+          showToast(`📥 Đã nhập ${imported.length} câu phụ đề từ file!`);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('delogoEnableToggle').addEventListener('change', (e) => {
+      state.delogo.enabled = e.target.checked;
+      renderCurrentFrame();
+      showToast(state.delogo.enabled ? '🪄 Đã bật bộ lọc Xoá Logo!' : 'Đã tắt Xoá Logo (hiện lại logo gốc)');
+    });
+    document.getElementById('delogoModeSelect').addEventListener('change', (e) => {
+      state.delogo.mode = e.target.value;
+      renderCurrentFrame();
+    });
+    ['X', 'Y', 'W', 'H'].forEach(axis => {
+      const inp = document.getElementById(`delogo${axis}Input`);
+      const val = document.getElementById(`delogo${axis}Val`);
+      inp.addEventListener('input', () => {
+        const k = axis.toLowerCase();
+        state.delogo[k] = parseInt(inp.value, 10);
+        val.textContent = state.delogo[k];
+        renderCurrentFrame();
+      });
+    });
+    document.getElementById('delogoStrengthInput').addEventListener('input', (e) => {
+      state.delogo.strength = parseInt(e.target.value, 10);
+      document.getElementById('delogoStrengthVal').textContent = state.delogo.strength;
+      renderCurrentFrame();
+    });
+    document.getElementById('showDelogoBoxToggle').addEventListener('change', (e) => {
+      state.delogo.showBox = e.target.checked;
+      renderCurrentFrame();
+    });
+
+    function setDelogoPreset(x, y) {
+      state.delogo.x = x;
+      state.delogo.y = y;
+      document.getElementById('delogoXInput').value = x;
+      document.getElementById('delogoXVal').textContent = x;
+      document.getElementById('delogoYInput').value = y;
+      document.getElementById('delogoYVal').textContent = y;
+      renderCurrentFrame();
+    }
+    document.getElementById('presetTopRightBtn').addEventListener('click', () => setDelogoPreset(74, 8));
+    document.getElementById('presetTopLeftBtn').addEventListener('click', () => setDelogoPreset(5, 8));
+    document.getElementById('presetBottomRightBtn').addEventListener('click', () => setDelogoPreset(74, 80));
+    document.getElementById('presetBottomLeftBtn').addEventListener('click', () => setDelogoPreset(5, 80));
+
+    document.querySelectorAll('.sticker-add-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const content = btn.getAttribute('data-sticker');
+        const st = Number(state.currentTime.toFixed(1));
+        const end = Math.min(getTotalDuration(), st + 5);
+        state.stickers.push({
+          id: 'stk-' + Date.now(),
+          content,
+          x: 30 + Math.floor(Math.random() * 40),
+          y: 25 + Math.floor(Math.random() * 35),
+          size: content.length > 4 ? 22 : 48,
+          start: st,
+          end: Math.max(st + 1, end)
+        });
+        renderAllUI();
+        renderCurrentFrame();
+        showToast(`✨ Đã chèn nhãn dán ${content} (Kéo trên màn hình để chỉnh vị trí)`);
+      });
+    });
+
+    document.querySelectorAll('.vfx-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.vfx = btn.getAttribute('data-vfx');
+        document.querySelectorAll('.vfx-btn').forEach(b => {
+          b.className = 'vfx-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs py-2 rounded';
+        });
+        btn.className = 'vfx-btn bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs py-2 rounded font-semibold';
+        renderCurrentFrame();
+        showToast(`🔥 Đã áp dụng hiệu ứng VFX: ${btn.textContent}`);
+      });
+    });
+
+    const colorMap = [
+      { id: 'fxBright', key: 'brightness' },
+      { id: 'fxContrast', key: 'contrast' },
+      { id: 'fxSat', key: 'saturation' },
+      { id: 'fxHue', key: 'hue' },
+      { id: 'fxSpeed', key: 'speed' }
+    ];
+    colorMap.forEach(({ id, key }) => {
+      const inp = document.getElementById(`${id}Input`);
+      const val = document.getElementById(`${id}Val`);
+      inp.addEventListener('input', () => {
+        state.color[key] = parseFloat(inp.value);
+        val.textContent = state.color[key];
+        renderCurrentFrame();
+      });
+    });
+
+    document.getElementById('resetColorBtn').addEventListener('click', () => {
+      state.color = { brightness: 100, contrast: 100, saturation: 100, hue: 0, speed: 1.0 };
+      colorMap.forEach(({ id, key }) => {
+        document.getElementById(`${id}Input`).value = state.color[key];
+        document.getElementById(`${id}Val`).textContent = state.color[key];
+      });
+      renderCurrentFrame();
+      showToast('Đã đặt lại bộ lọc màu mặc định!');
+    });
+
+    let mediaRecorderMic = null;
+    let micChunks = [];
+    let isRecordingMic = false;
+
+    document.getElementById('recordMicBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('recordMicBtn');
+      if (!isRecordingMic) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorderMic = new MediaRecorder(stream);
+          micChunks = [];
+          const recStart = state.currentTime;
+          const t0 = performance.now();
+
+          mediaRecorderMic.ondataavailable = (ev) => {
+            if (ev.data.size > 0) micChunks.push(ev.data);
+          };
+          mediaRecorderMic.onstop = () => {
+            const dur = Math.max(1.5, (performance.now() - t0) / 1000);
+            const blob = new Blob(micChunks, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            state.voiceTracks.push({
+              id: 'voc-' + Date.now(),
+              label: '🎙️ Ghi âm Micro trực tiếp',
+              text: '',
+              start: recStart,
+              duration: dur,
+              audioUrl: url
+            });
+            stream.getTracks().forEach(t => t.stop());
+            renderAllUI();
+            showToast('🎙️ Đã lưu bản thu âm giọng nói vào Timeline!');
+          };
+          mediaRecorderMic.start();
+          isRecordingMic = true;
+          btn.innerHTML = '<span>⏹ Dừng Thu Âm & Lưu Vào Timeline</span>';
+          btn.classList.replace('bg-rose-600', 'bg-amber-500');
+        } catch (err) {
+          state.voiceTracks.push({
+            id: 'voc-' + Date.now(),
+            label: '🎙️ Bản thu giọng mẫu (Mic)',
+            text: 'Bản thu giọng trực tiếp',
+            start: state.currentTime,
+            duration: 3.5,
+            audioUrl: null
+          });
+          renderAllUI();
+          showToast('🎙️ Đã chèn Track thu âm vào vị trí hiện tại!');
+        }
+      } else {
+        if (mediaRecorderMic && mediaRecorderMic.state !== 'inactive') {
+          mediaRecorderMic.stop();
+        }
+        isRecordingMic = false;
+        btn.innerHTML = '<span>🎙️ Bắt đầu Thu Âm Giọng Nói</span>';
+        btn.classList.replace('bg-amber-500', 'bg-rose-600');
+      }
+    });
+
+    function speakTextViet(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'vi-VN';
+        utter.pitch = parseFloat(document.getElementById('ttsPitchInput').value) || 1.0;
+        utter.rate = parseFloat(document.getElementById('ttsRateInput').value) || 1.0;
+        window.speechSynthesis.speak(utter);
+      }
+    }
+
+    document.getElementById('previewTtsBtn').addEventListener('click', () => {
+      const txt = document.getElementById('ttsTextInput').value.trim();
+      if (!txt) return;
+      speakTextViet(txt);
+      showToast('🔊 Đang đọc thử giọng lồng tiếng AI...');
+    });
+
+    document.getElementById('addVoiceTrackBtn').addEventListener('click', () => {
+      const txt = document.getElementById('ttsTextInput').value.trim();
+      if (!txt) return;
+      const estDur = Math.max(2.0, Math.min(10, txt.split(/\s+/).length * 0.42));
+      state.voiceTracks.push({
+        id: 'voc-' + Date.now(),
+        label: `🗣️ AI: "${txt.slice(0, 24)}..."`,
+        text: txt,
+        start: Number(state.currentTime.toFixed(1)),
+        duration: Number(estDur.toFixed(1)),
+        audioUrl: null
+      });
+      speakTextViet(txt);
+      renderAllUI();
+      showToast('🎙️ Đã chèn giọng đọc AI vào Timeline!');
+    });
+
+    document.querySelectorAll('.sfx-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.getAttribute('data-sfx');
+        playSoundEffect(type);
+        state.voiceTracks.push({
+          id: 'voc-' + Date.now(),
+          label: `🎵 Hiệu ứng: ${btn.textContent}`,
+          text: '',
+          start: Number(state.currentTime.toFixed(1)),
+          duration: 2.5,
+          audioUrl: null
+        });
+        renderAllUI();
+        showToast(`Đã thêm âm thanh ${btn.textContent} vào Timeline!`);
+      });
+    });
+
+    document.getElementById('bgmVolInput').addEventListener('input', (e) => {
+      state.bgmVolume = parseInt(e.target.value, 10);
+      document.getElementById('bgmVolVal').textContent = state.bgmVolume;
+    });
+
+    document.getElementById('applyClipDurationBtn').addEventListener('click', () => {
+      const clip = state.clips.find(c => c.id === state.selectedClipId);
+      if (!clip) return;
+      const val = parseFloat(document.getElementById('inspClipDuration').value);
+      if (val >= 1 && val <= 60) {
+        clip.duration = val;
+        renderAllUI();
+        renderCurrentFrame();
+        showToast('Đã cập nhật thời lượng Clip!');
+      }
+    });
+
+    document.getElementById('inspScaleInput').addEventListener('input', (e) => {
+      const clip = state.clips.find(c => c.id === state.selectedClipId);
+      if (!clip) return;
+      clip.scale = parseInt(e.target.value, 10);
+      document.getElementById('inspScaleVal').textContent = clip.scale;
+      renderCurrentFrame();
+    });
+
+    document.getElementById('timelineZoomInput').addEventListener('input', (e) => {
+      state.pxPerSec = parseInt(e.target.value, 10);
+      renderTimelineTracks();
+    });
+
+    const timelineInner = document.getElementById('timelineInner');
+    let isScrubbing = false;
+    function scrubFromEvent(e) {
+      const rect = timelineInner.getBoundingClientRect();
+      const clickX = Math.max(0, e.clientX - rect.left);
+      const newTime = Math.min(getTotalDuration(), clickX / state.pxPerSec);
+      state.currentTime = Number(newTime.toFixed(2));
+      syncVideoElementsToTime();
+      renderCurrentFrame();
+      updatePlayheadUI();
+    }
+    document.getElementById('timeRuler').addEventListener('mousedown', (e) => {
+      pausePlayback();
+      isScrubbing = true;
+      scrubFromEvent(e);
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (isScrubbing) scrubFromEvent(e);
+    });
+    window.addEventListener('mouseup', () => {
+      isScrubbing = false;
+    });
+
+    const renderModal = document.getElementById('renderModal');
+    document.getElementById('openRenderModalBtn').addEventListener('click', () => {
+      pausePlayback();
+      renderModal.classList.remove('hidden');
+      document.getElementById('renderStatusText').textContent = 'Sẵn sàng xuất file';
+      document.getElementById('renderProgressBar').style.width = '0%';
+      document.getElementById('downloadRenderedLink').classList.add('hidden');
+    });
+    document.getElementById('closeRenderModalBtn').addEventListener('click', () => {
+      renderModal.classList.add('hidden');
+    });
+
+    document.getElementById('startRenderBtn').addEventListener('click', () => {
+      const fps = parseInt(document.getElementById('exportFpsSelect').value, 10) || 30;
+      const totalDur = getTotalDuration();
+      const statusEl = document.getElementById('renderStatusText');
+      const barEl = document.getElementById('renderProgressBar');
+      const dlLink = document.getElementById('downloadRenderedLink');
+
+      dlLink.classList.add('hidden');
+      state.isRendering = true;
+      state.currentTime = 0;
+
+      let recorder = null;
+      let chunks = [];
+      try {
+        const stream = canvas.captureStream(fps);
+        const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+          ? 'video/webm;codecs=vp9'
+          : 'video/webm';
+        recorder = new MediaRecorder(stream, { mimeType: mime });
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) chunks.push(e.data);
+        };
+        recorder.onstop = () => {
+          state.isRendering = false;
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          dlLink.href = url;
+          dlLink.download = `${(document.getElementById('projectTitleInput').value || 'capcut_video').replace(/\s+/g, '_')}.webm`;
+          dlLink.classList.remove('hidden');
+          statusEl.textContent = '✅ Hoàn tất Render 100%!';
+          renderCurrentFrame();
+          showToast('🎉 Render thành công! Bấm "Tải Video (.webm)" để lưu về máy.');
+        };
+        recorder.start();
+      } catch (err) {
+        recorder = null;
+      }
+
+      statusEl.textContent = 'Đang kết xuất từng khung hình (Vietsub + Xoá Logo + VFX)...';
+      const stepSec = 1 / fps;
+      const renderInterval = setInterval(() => {
+        state.currentTime += stepSec * 2.5;
+        const pct = Math.min(100, Math.round((state.currentTime / totalDur) * 100));
+        barEl.style.width = `${pct}%`;
+        statusEl.textContent = `Đang Render... ${pct}%`;
+
+        syncVideoElementsToTime();
+        renderCurrentFrame();
+        updatePlayheadUI();
+
+        if (state.currentTime >= totalDur) {
+          clearInterval(renderInterval);
+          state.currentTime = 0;
+          state.isRendering = false;
+          if (recorder && recorder.state !== 'inactive') {
+            recorder.stop();
+          } else {
+            statusEl.textContent = '✅ Hoàn tất Render 100%!';
+            renderCurrentFrame();
+          }
+        }
+      }, 30);
+    });
+
+    window.addEventListener('load', () => {
+      renderAllUI();
+      renderCurrentFrame();
+    });
+  </script>
+</body>
+</html>
